@@ -1,6 +1,9 @@
+import os
+
 from analysis import payback, profile_summary, simulate_battery, simulate_dsr
 from load_profile import example_profile, read_profile
 from pse import get_prices
+from report import battery_chart, daily_profile_chart, save_excel
 
 # ---- analysis parameters ----
 YEAR = 2026
@@ -19,6 +22,8 @@ BATTERY_KW = 250
 EFFICIENCY = 0.9
 BATTERY_COST = 1500        # PLN/kWh - assumption
 # -----------------------------
+
+os.makedirs("results", exist_ok=True)
 
 prices = get_prices(YEAR, MONTHS)
 data = prices.to_frame()
@@ -54,3 +59,10 @@ summary["Magazyn - prosty okres zwrotu [lata]"] = round(years, 1) if years else 
 
 for k, v in summary.items():
     print(f"{k:<50} {v}")
+
+# --- report ---
+charts = ["results/daily_profile.png", "results/battery.png"]
+daily_profile_chart(data, charts[0])
+battery_chart(battery, charts[1])
+save_excel("results/report.xlsx", summary, dsr, battery, data, charts)
+print("\nReport saved: results/report.xlsx")
