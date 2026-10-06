@@ -1,6 +1,6 @@
-# Analiza elastyczności odbiorcy przemysłowego
+*English version below.*
 
-🇬🇧 *English version below.*
+# Analiza elastyczności odbiorcy przemysłowego
 
 Prosty skrypt, który dla profilu zużycia energii firmy sprawdza, ile mogłaby ona zyskać na:
 
