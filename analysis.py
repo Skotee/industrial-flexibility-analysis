@@ -2,7 +2,6 @@ import pandas as pd
 
 QUARTER = 0.25  # h
 
-
 def profile_summary(data):
     load = data["load_kw"]
     energy_mwh = load.sum() * QUARTER / 1000
@@ -20,6 +19,33 @@ def profile_summary(data):
         "Koszt energii wg RCE [zł]": round(cost),
     }
 
+def simulate_dsr(data, reduction_kw, min_load_kw, hours=2):
+    """Shifting part of production from the most expensive hours of the day to the cheapest.
+    Load never goes below min_load_kw (processes that can't be switched off)."""
+    n = hours * 4
+    results = []
+
+    for day, d in data.groupby(data.index.date):
+        possible = (d["load_kw"] - min_load_kw).clip(lower=0, upper=reduction_kw)
+        expensive = d[possible > 0].nlargest(n, "price")
+        if len(expensive) == 0:
+            continue  # e.g. weekend - nothing to reduce
+
+        shifted_mwh = possible[expensive.index] * QUARTER / 1000
+        cheap = d.nsmallest(n, "price")
+
+        savings = (shifted_mwh * expensive["price"]).sum()
+        extra_cost = shifted_mwh.sum() * cheap["price"].mean()
+
+        results.append({
+            "day": pd.Timestamp(day),
+            "shifted_energy_mwh": shifted_mwh.sum(),
+            "avg_expensive_price": expensive["price"].mean(),
+            "avg_cheap_price": cheap["price"].mean(),
+            "profit_pln": savings - extra_cost,
+        })
+
+    return pd.DataFrame(results).set_index("day")
 
 def simulate_battery(data, capacity_kwh, power_kw, efficiency=0.9):
     """Simplest arbitrage: one cycle per day.

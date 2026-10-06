@@ -1,4 +1,4 @@
-from analysis import payback, profile_summary, simulate_battery
+from analysis import payback, profile_summary, simulate_battery, simulate_dsr
 from load_profile import example_profile, read_profile
 from pse import get_prices
 
@@ -6,6 +6,12 @@ from pse import get_prices
 YEAR = 2026
 MONTHS = [7, 8, 9]
 PROFILE_FILE = None  # e.g. "data/customer_profile.csv", None = example profile
+
+# DSR
+REDUCTION_KW = 400
+MIN_LOAD_KW = 300          # the plant can't go below this load
+REDUCTION_HOURS = 2        # how many hours per day production is shifted
+CAPACITY_MARKET_RATE = 200 # PLN/kW/year - assumption, check auction results
 
 # battery storage
 BATTERY_KWH = 500
@@ -25,6 +31,15 @@ days = data.index.normalize().nunique()
 print(f"Data: {len(data)} quarter-hours, {days} days\n")
 
 summary = profile_summary(data)
+
+# --- DSR ---
+dsr = simulate_dsr(data, REDUCTION_KW, MIN_LOAD_KW, REDUCTION_HOURS)
+dsr_yearly, _ = payback(dsr["profit_pln"].sum(), days, 0)
+capacity_market = REDUCTION_KW * CAPACITY_MARKET_RATE
+
+summary["DSR - zysk z przesunięcia w okresie [zł]"] = round(dsr["profit_pln"].sum())
+summary["DSR - zysk z przesunięcia, szacunek roczny [zł]"] = round(dsr_yearly)
+summary["DSR - Rynek Mocy, szacunek roczny [zł]"] = round(capacity_market)
 
 # --- battery ---
 battery = simulate_battery(data, BATTERY_KWH, BATTERY_KW, EFFICIENCY)
