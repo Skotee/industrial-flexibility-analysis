@@ -64,12 +64,6 @@ Dzienny zysk z arbitrażu magazynu energii:
 - stawka Rynku Mocy i koszt magazynu to założenia, nie aktualne dane,
 - DSR nie uwzględnia kosztów technologicznych przesunięcia produkcji.
 
-### Co dalej
-
-- produkcja z PV (dane z PVGIS) i autokonsumpcja,
-- optymalizacja pracy magazynu (np. `pulp`),
-- prosty dashboard w Streamlit.
-
 ---
 
 # Industrial customer flexibility analysis
@@ -135,9 +129,3 @@ Daily battery arbitrage profit:
 - the battery does at most one cycle per day, charge/discharge order within the day is not checked,
 - Capacity Market rate and battery cost are assumptions, not current data,
 - DSR ignores the technological cost of shifting production.
-
-### Next steps
-
-- PV generation (PVGIS data) and self-consumption,
-- battery dispatch optimisation (e.g. `pulp`),
-- a simple Streamlit dashboard.
